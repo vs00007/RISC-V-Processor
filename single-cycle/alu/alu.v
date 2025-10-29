@@ -1,9 +1,11 @@
+// alu module. alu is purely combinational.
 module alu #(
-    REG_WIDTH = 64, ALU_CTRL_BITS = 5 // register width and number of alu control bits
+    parameter int REG_WIDTH = 64,    // register width
+    parameter int ALU_CTRL_BITS = 5  // number of alu control bits
 ) (
     input [REG_WIDTH - 1 : 0] rs1, rs2, imm,
     input [ALU_CTRL_BITS - 1 : 0] ALUCtrl,
-    output [REG_WIDTH - 1 : 0] alu_out, 
+    output reg [REG_WIDTH - 1 : 0] alu_out, 
     output alu_zero
 );
     wire [REG_WIDTH - 1 : 0] add_ans, sub_ans, xor_ans, or_ans, and_ans, sll_ans, srl_ans, sra_ans, slt_ans, sltu_ans;
@@ -19,9 +21,9 @@ module alu #(
     assign xor_ans = rs1 ^ rs2;
     assign or_ans = rs1 | rs2;
     assign and_ans = rs1 & rs2;
-    assign sll_ans = rs1 << rs2;
-    assign srl_ans = rs1 >> rs2;
-    assign sra_ans = rs1 >>> rs2;
+    assign sll_ans = rs1 << rs2[5:0];
+    assign srl_ans = rs1 >> rs2[5:0];
+    assign sra_ans = $signed(rs1) >>> rs2[5:0];
     assign slt_ans = ($signed (rs1) < $signed(rs2)) ? {{(REG_WIDTH-1){1'b0}}, 1'b1}: 0;
     assign sltu_ans = (rs1 < rs2) ? {{(REG_WIDTH-1){1'b0}}, 1'b1}: 0;
 
@@ -31,9 +33,9 @@ module alu #(
     assign xori_ans = rs1 ^ imm;
     assign ori_ans = rs1 | imm;
     assign andi_ans = rs1 & imm;
-    assign slli_ans = rs1 << imm;
-    assign srli_ans = rs1 >> imm;
-    assign srai_ans = rs1 >>> imm;
+    assign slli_ans = rs1 << imm[5:0];
+    assign srli_ans = rs1 >> imm[5:0];
+    assign srai_ans = $signed(rs1) >>> imm[5:0];
     assign slti_ans = ($signed (rs1) < $signed(imm)) ? {{(REG_WIDTH-1){1'b0}}, 1'b1}: 0;
     assign sltui_ans = (rs1 < imm) ? {{(REG_WIDTH-1){1'b0}}, 1'b1}: 0;
 
@@ -53,15 +55,14 @@ module alu #(
             5'd01001: alu_out = sltu_ans; // R-Type
 
             5'b10000: alu_out = addi_ans;
-            // left 5'b10001 so that all the instructions have similar last 4 bits
-            5'b10010: alu_out = xori_ans;
-            5'b10011: alu_out = ori_ans;
-            5'b10100: alu_out = andi_ans;
-            5'b10101: alu_out = slli_ans;
-            5'b10110: alu_out = srli_ans;
-            5'b10111: alu_out = srai_ans;
-            5'b11000: alu_out = slti_ans; 
-            5'b11001: alu_out = sltui_ans; // I-type
+            5'b10001: alu_out = xori_ans;
+            5'b10010: alu_out = ori_ans;
+            5'b10011: alu_out = andi_ans;
+            5'b10100: alu_out = slli_ans;
+            5'b10101: alu_out = srli_ans;
+            5'b10110: alu_out = srai_ans;
+            5'b10111: alu_out = slti_ans; 
+            5'b11000: alu_out = sltui_ans; // I-type
             default: alu_out = {REG_WIDTH{1'bx}};
         endcase
     end
