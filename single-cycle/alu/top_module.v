@@ -111,5 +111,5 @@ module top_module(
 
         // output
         .pc_next(pc_in)
-    )
+    );
 endmodule

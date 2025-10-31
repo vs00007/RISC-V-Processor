@@ -5,7 +5,7 @@ module pc_reg #(
     input clk,
     input rst,
     input [PC_WIDTH - 1 : 0] pc_in,
-    output [PC_WIDTH - 1 : 0] pc_out
+    output reg [PC_WIDTH - 1 : 0] pc_out
 );
     always @ (posedge clk, posedge rst) begin
         if(rst) pc_out <= 0;

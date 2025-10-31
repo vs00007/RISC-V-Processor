@@ -12,10 +12,15 @@ logic [63:0] mem_write_data;
 logic [63:0] mem_read_data;
 
 top_module top_module_dut(
-    .instruction(instruction),
+    // .instruction(instruction),
     .clk(clk),
     .rst(rst)
 );
+
+initial begin
+    $dumpfile("waveform.vcd");   // name of the output file
+    $dumpvars(0, tb1);        // dump all signals in testbench "tb_top"
+end
 
 always #5 clk = ~clk;
 
@@ -54,7 +59,7 @@ initial begin
 
     // Execute each instruction
     for (i = 0; i < instr_count; i = i + 1) begin
-        top_module_dut.instruction = top_module_dut.instruction_mem_dut.instr_mem[i];
+        // top_module_dut.instruction = top_module_dut.instruction_mem_dut.instr_mem[i];
         $display("Executing instruction %0d: 0x%08h", i, top_module_dut.instruction);
         
         #10; // simulate one "cycle" per instruction
