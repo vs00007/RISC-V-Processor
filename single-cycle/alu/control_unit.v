@@ -117,6 +117,10 @@ module control_unit#(
             ALUCtrl = 5'b10000; // require addi: M[rs1+imm][whatever bits] = rs2[whatever bits]
             {MemSign, MemWidth} = funct3;
         end
+
+        if(b_type) begin
+            ALUCtrl = 5'b00001; // dont care about the alu
+        end
     end
 
 assign branch = b_type | is_jal | is_jalr | is_lui | is_auipc;

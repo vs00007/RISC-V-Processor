@@ -1,6 +1,6 @@
 // write the top module
 module top_module(
-    input [31:0] instruction,
+    // input [31:0] instruction,
     input clk, rst
 );
     logic [63:0] imm;
@@ -13,6 +13,9 @@ module top_module(
     logic [63:0] mem_read_data;
     logic MemSign;
     logic [1:0] MemWidth;
+    logic [63:0] pc_in;
+    logic [63:0] pc_out;
+    logic [31:0] instruction;
 
     reg_file reg_file_dut (
         // inputs 
@@ -77,4 +80,36 @@ module top_module(
         // output (read data)
         .rdata(mem_read_data)
     );
+
+    pc_reg pc_reg_dut(
+        // inputs
+        .clk(clk),
+        .rst(rst),
+        .pc_in(pc_in),
+
+        // output
+        .pc_out(pc_out)
+    );
+
+    instruction_mem instruction_mem_dut(
+        // inputs
+        .clk(clk),
+        .pc(pc_out),
+
+        // output
+        .instruction(instruction)
+    );
+
+    pc_change pc_change_dut(
+        // inputs
+        .pc(pc_out),
+        .imm(imm),
+        .branch(branch),
+        .rs1(rs1),
+        .rs2(rs2),
+        .funct3(instruction[14:12]),
+
+        // output
+        .pc_next(pc_in)
+    )
 endmodule

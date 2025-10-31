@@ -15,8 +15,8 @@ module data_mem #(
 
     logic [7:0] mem [0:MEM_DEPTH-1];
     wire [ADDR_WIDTH-1:0] addr = full_addr[ADDR_WIDTH-1:0]; // effective address for simulation
-    logic [15:0] half;
-    logic [31:0] word;
+    // logic [15:0] half = 0;
+    // logic [31:0] word = 0;
     // synchronous writes
     always @(posedge clk) begin
             if (MemWrite) begin
@@ -46,26 +46,25 @@ module data_mem #(
     end
     end
 
-    // asynchronous read
-    always @ (*) begin
-        half = 0;
-        word = 0;
-        rdata = {(REG_WIDTH){1'b0}};
+    // synchronous read
+    always @ (posedge clk) begin
         if (MemRead) begin
             case(MemWidth)
                 2'd0: // lb and lbu
-                    rdata = ~MemSign ? {{(REG_WIDTH - 8){mem[addr][7]}}, mem[addr]} : {{(REG_WIDTH - 8){1'b0}}, mem[addr]};
+                    rdata <= ~MemSign ? {{(REG_WIDTH - 8){mem[addr][7]}}, mem[addr]} : {{(REG_WIDTH - 8){1'b0}}, mem[addr]};
                 2'd1: begin // lh and lhu
-                    half = {mem[addr+1], mem[addr]};
-                    rdata = ~MemSign ? {{(REG_WIDTH - 16){half[15]}}, half} : {{(REG_WIDTH - 16){1'b0}}, half};
+                    // half = {mem[addr+1], mem[addr]};
+                    rdata <= ~MemSign ? {{(REG_WIDTH - 16){{mem[addr+1], mem[addr]}[15]}}, {mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 16){1'b0}}, {mem[addr+1], mem[addr]}};
                 end
                 2'd2: begin // lw and lwu
-                    word = {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
-                    rdata = ~MemSign ? {{(REG_WIDTH - 32){word[31]}}, word} : {{(REG_WIDTH - 32){1'b0}}, word};
+                    // word = {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
+                    rdata <= ~MemSign ? {{(REG_WIDTH - 32){{mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}[31]}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 32){1'b0}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}};
                 end
                 2'd3: begin // ld
-                    rdata = {mem[addr+7], mem[addr+6], mem[addr+5], mem[addr+4], mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
+                    rdata <= {mem[addr+7], mem[addr+6], mem[addr+5], mem[addr+4], mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
                 end
+                default:
+        		rdata <= {(REG_WIDTH){1'b0}};
             endcase
         end
     end
