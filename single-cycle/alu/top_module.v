@@ -16,6 +16,11 @@ module top_module(
     logic [63:0] pc_in;
     logic [63:0] pc_out;
     logic [31:0] instruction;
+    logic branch_taken_out;
+    logic is_jal;
+    logic is_jalr;
+    logic is_auipc;
+    logic [63:0] operand1;
 
     reg_file reg_file_dut (
         // inputs 
@@ -39,6 +44,9 @@ module top_module(
         // outputs
         .ALUCtrl(ALUCtrl),
         .branch(branch),
+        .is_jal(is_jal),
+        .is_jalr(is_jalr),
+        .is_auipc(is_auipc),
         .MemRead(MemRead),
         .MemtoReg(MemtoReg),
         .MemWrite(MemWrite),
@@ -57,7 +65,7 @@ module top_module(
 
     alu alu_dut(
         // inputs
-        .rs1(rs1),
+        .rs1(operand1),
         .rs2(rs2),
         .imm(imm),
         .ALUCtrl(ALUCtrl),
@@ -100,16 +108,37 @@ module top_module(
         .instruction(instruction)
     );
 
-    pc_change pc_change_dut(
-        // inputs
-        .pc(pc_out),
-        .imm(imm),
-        .branch(branch),
+    branch_taken branch_taken_dut(
+        // inputs 
         .rs1(rs1),
         .rs2(rs2),
         .funct3(instruction[14:12]),
 
         // output
+        .branch_taken_out(branch_taken_out)
+    );
+
+    pc_change pc_change_dut(
+        // inputs
+        .pc(pc_out),
+        .imm(imm),
+        .rs1(rs1),
+        .branch(branch),
+        .is_jal(is_jal),
+        .is_jalr(is_jalr),
+        .branch_taken(branch_taken_out),
+
+        // output
         .pc_next(pc_in)
+    );
+
+    alu_op1_mux alu_op1_mux_dut(
+        // inputs
+        .jump(is_jal | is_jalr | is_auipc),
+        .rs1(rs1),
+        .pc(pc_out),
+
+        // output
+        .operand1(operand1)
     );
 endmodule

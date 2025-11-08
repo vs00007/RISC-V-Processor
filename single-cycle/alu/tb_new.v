@@ -29,22 +29,23 @@ module tb1();
 
     // Initialization
     initial begin
-        clk = 0;
-        rst = 1;
-
-        // Load instruction and data memory
         $display("Loading instruction and data memory...");
         $readmemh("instructions.txt", top_module_dut.instruction_mem_dut.instr_mem);
         $readmemh("data_mem_init.hex", top_module_dut.data_mem_dut.mem);
+        clk = 0;
+        rst = 1;
+        #2 rst = 0;
+        // top_module_dut.pc_reg_dut.pc_out = 0;
+        // Load instruction and data memory
 
-        #20 rst = 0;  // keep reset for 2 clock cycles
+        // #20 rst = 0;  // keep reset for 2 clock cycles
         $display("Reset deasserted. Starting simulation.\n");
 
         // Run for a fixed number of cycles
-        repeat (10) begin  // Adjust depending on your program length
+        repeat (3) begin  // Adjust depending on your program length
             @(posedge clk);
             $display("PC = 0x%016h, Instruction = 0x%08h",
-                     top_module_dut.pc_reg_dut.pc_out,
+                     top_module_dut.instruction_mem_dut.pc,
                      top_module_dut.instruction_mem_dut.instruction);
             print_regfile();
         end

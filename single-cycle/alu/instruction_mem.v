@@ -9,8 +9,10 @@ module instruction_mem #(
 );
     logic [31 : 0] instr_mem [0 : (1<<ADDR_WIDTH) - 1];
 
+    // asynchronous read
+    // should make this synchronous !! Think about this
     // always @ (posedge clk) begin
     always @ (*) begin
-        instruction = instr_mem[pc[ADDR_WIDTH + 1 : 2]];
+        instruction = instr_mem[pc[ADDR_WIDTH + 1: 2]];
     end
 endmodule

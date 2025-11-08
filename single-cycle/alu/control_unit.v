@@ -7,6 +7,9 @@ module control_unit#(
  
     output reg [ALU_CTRL_BITS - 1 : 0] ALUCtrl, 
     output branch,
+    output is_jal,
+    output is_jalr,
+    output is_auipc,
     output MemRead, 
     output MemtoReg,
     output MemWrite,
@@ -19,7 +22,7 @@ module control_unit#(
     wire [2:0] funct3; // funct3 for r-type
     wire [6:0] funct7; // funct7 for r-type
     wire [5:0] funct6; // funct6 for i-type
-    wire r_type, i_type, s_type, b_type, j_type, load_type, is_jal, is_jalr, is_lui, is_auipc;
+    wire r_type, i_type, s_type, b_type, j_type, load_type, is_lui;
 
     // opcode from the instruction
     assign opcode = instruction[6:0];
@@ -121,9 +124,18 @@ module control_unit#(
         if(b_type) begin
             ALUCtrl = 5'b00001; // dont care about the alu
         end
+        if(is_lui) begin
+            ALUCtrl = 5'b11111; // lui ALUCtrl, newly defined! 
+        end
+        if(is_jal | is_jalr) begin
+            ALUCtrl = 5'b11110; // jal ALUCtrl, newly defined!
+        end
+        if(is_auipc) begin
+            ALUCtrl = 5'b10000; // require addi: rd = PC + imm
+        end
     end
 
-assign branch = b_type | is_jal | is_jalr | is_lui | is_auipc;
+assign branch = b_type;
 assign MemRead = load_type;
 assign MemtoReg = load_type;
 assign MemWrite = s_type;

@@ -63,6 +63,10 @@ module alu #(
             5'b10110: alu_out = srai_ans;
             5'b10111: alu_out = slti_ans; 
             5'b11000: alu_out = sltui_ans; // I-type
+
+            5'b11110: alu_out = rs1 + 4; // jal: rs1 is pc in this case due to the alu_op1_sel module
+            5'b11111: alu_out = imm; // lui
+
             default: alu_out = {REG_WIDTH{1'bx}};
         endcase
     end

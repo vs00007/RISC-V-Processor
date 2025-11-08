@@ -46,25 +46,27 @@ module data_mem #(
     end
     end
 
-    // synchronous read
-    always @ (posedge clk) begin
+    // asynchronous read
+    // should be made synchronous !! Think about this
+    // always @ (posedge clk) begin
+    always @ (*) begin
         if (MemRead) begin
             case(MemWidth)
                 2'd0: // lb and lbu
-                    rdata <= ~MemSign ? {{(REG_WIDTH - 8){mem[addr][7]}}, mem[addr]} : {{(REG_WIDTH - 8){1'b0}}, mem[addr]};
+                    rdata = ~MemSign ? {{(REG_WIDTH - 8){mem[addr][7]}}, mem[addr]} : {{(REG_WIDTH - 8){1'b0}}, mem[addr]};
                 2'd1: begin // lh and lhu
                     // half = {mem[addr+1], mem[addr]};
-                    rdata <= ~MemSign ? {{(REG_WIDTH - 16){mem[addr+1][7]}}, {mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 16){1'b0}}, {mem[addr+1], mem[addr]}};
+                    rdata = ~MemSign ? {{(REG_WIDTH - 16){mem[addr+1][7]}}, {mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 16){1'b0}}, {mem[addr+1], mem[addr]}};
                 end
                 2'd2: begin // lw and lwu
                     // word = {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
-                    rdata <= ~MemSign ? {{(REG_WIDTH - 32){mem[addr+3][7]}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 32){1'b0}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}};
+                    rdata = ~MemSign ? {{(REG_WIDTH - 32){mem[addr+3][7]}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}} : {{(REG_WIDTH - 32){1'b0}}, {mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]}};
                 end
                 2'd3: begin // ld
-                    rdata <= {mem[addr+7], mem[addr+6], mem[addr+5], mem[addr+4], mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
+                    rdata = {mem[addr+7], mem[addr+6], mem[addr+5], mem[addr+4], mem[addr+3], mem[addr+2], mem[addr+1], mem[addr]};
                 end
                 default:
-        		rdata <= {(REG_WIDTH){1'b0}};
+        		rdata = {(REG_WIDTH){1'b0}};
             endcase
         end
     end
