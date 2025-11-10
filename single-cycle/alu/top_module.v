@@ -1,26 +1,30 @@
 // write the top module
-module top_module(
+module top_module#(
+    parameter int REG_WIDTH = 64,
+    parameter int PC_WIDTH = 64
+)
+(
     // input [31:0] instruction,
     input clk, rst
 );
-    logic [63:0] imm;
-    logic [63:0] alu_out;
+    logic [REG_WIDTH - 1 : 0] imm;
+    logic [REG_WIDTH - 1 : 0] alu_out;
     logic alu_zero;
     logic branch, MemRead, MemtoReg, MemWrite, RegWrite;
     logic [4:0] ALUCtrl;
-    logic [63:0] rs1, rs2;
-    logic [63:0] mem_write_data;
-    logic [63:0] mem_read_data;
+    logic [REG_WIDTH - 1 : 0] rs1, rs2;
+    logic [REG_WIDTH - 1 : 0] mem_write_data;
+    logic [REG_WIDTH - 1 : 0] mem_read_data;
     logic MemSign;
     logic [1:0] MemWidth;
-    logic [63:0] pc_in;
-    logic [63:0] pc_out;
+    logic [PC_WIDTH - 1 : 0] pc_in;
+    logic [PC_WIDTH - 1 : 0] pc_out;
     logic [31:0] instruction;
     logic branch_taken_out;
     logic is_jal;
     logic is_jalr;
     logic is_auipc;
-    logic [63:0] operand1;
+    logic [REG_WIDTH - 1 : 0] operand1;
 
     reg_file reg_file_dut (
         // inputs 
