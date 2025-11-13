@@ -1,19 +1,21 @@
 // the fourth register between MEM and WB stages
 module mem_wb_reg#(
     parameter int REG_WIDTH = 64,
+    parameter int REG_COUNT = 32,
     parameter int WB_Ctrl_bits = 5
 )
 (
     input clk,
+    input rst,
     input [WB_Ctrl_bits - 1 : 0] WB_Ctrl_in,
     input [REG_WIDTH - 1 : 0] mem_read_data_in,
     input [REG_WIDTH - 1 : 0] ALU_res_in,
-    input [$clog2(REG_WIDTH) - 1 : 0] rd_addr_in,
+    input [$clog2(REG_COUNT) - 1 : 0] rd_addr_in,
 
     output reg [WB_Ctrl_bits - 1 : 0] WB_Ctrl_out,
     output reg [REG_WIDTH - 1 : 0] mem_read_data_out,
     output reg [REG_WIDTH - 1 : 0] ALU_res_out,
-    output reg [$clog2(REG_WIDTH) - 1 : 0] rd_addr_out
+    output reg [$clog2(REG_COUNT) - 1 : 0] rd_addr_out
 );
     always @ (posedge clk, posedge rst) begin
         if(rst) begin

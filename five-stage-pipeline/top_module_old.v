@@ -29,13 +29,6 @@ module top_module#(
     logic [PC_WIDTH - 1 : 0] pc_branch_addr_3_in, pc_branch_addr_3_out;
     logic [REG_WIDTH - 1 : 0] mem_read_data_4_in, mem_read_data_4_out;
     logic [REG_WIDTH - 1 : 0] reg_wb_data;
-    logic [PC_WIDTH - 1 : 0] pc_4;
-    logic [REG_WIDTH - 1 : 0] alu_op1;
-    logic [PC_WIDTH - 1 : 0] pc_jump_addr_3_in;
-    logic [1:0] forwardA, forwardB;
-    logic [$clog2(REG_COUNT)-1:0] rs1_addr_2_out, rs2_addr_2_out; 
-    logic [REG_WIDTH-1:0] forwarded_rs1, forwarded_rs2;
-
 
     pc_reg pc_reg_dut(
         // inputs
@@ -47,30 +40,10 @@ module top_module#(
         .pc_out(pc_1_in)
     );
 
-    pc_next_mux pc_next_mux_dut(
-        // inputs
-        .branch_taken(branch_taken_3_in),
-        .jump(is_jal_3_out | is_jalr_3_out),
-        .pc_plus_4(pc_4),
-        .branch_addr(pc_branch_addr_3_in),
-        .pc_jump_addr(pc_jump_addr_3_in),
-
-        // output
-        .pc_next(pc_reg_in)
-    );
-
-    pc_4_add pc_4_add_dut(
-        // input
-        .pc_in(pc_1_in),
-
-        // output
-        .pc_out(pc_4)
-    );
-
     instruction_mem instruction_mem_dut(
         // inputs
         .clk(clk),
-        .pc(pc_1_in),
+        .pc(pc_reg_out),
 
         // output
         .instruction(instruction_1_in)
@@ -98,8 +71,8 @@ module top_module#(
         // Check this logic !!!
         .waddr(rd_addr_4_out),
         .wdata(reg_wb_data),
-        .raddr1(instruction_1_out[19:15]), 
-        .raddr2(instruction_1_out[24:20]),
+        .raddr1(instruction[19:15]), 
+        .raddr2(instruction[24:20]),
 
         // outputs
         .rdata1(rs1_2_in),
@@ -114,7 +87,7 @@ module top_module#(
         .imm(imm_2_in)
     );
 
-    control_unit control_unit_dut(
+    control_unit control_unit_tb(
         // input 
         .instruction(instruction_1_out),
 
@@ -141,12 +114,10 @@ module top_module#(
         .EX_Ctrl_in(ALUCtrl_2_in),
         .PC_in(pc_1_out),
         .rs1_data_in(rs1_2_in),
-        .rs2_data_in(rs2_2_in),
+        .rs2_data_out(rs2_2_in),
         .imm_in(imm_2_in),
         .funct3_in(instruction_1_out[14:12]), // for branch taken block
-        .rd_addr_in(instruction_1_out[11:7]),
-        .rs1_addr_in(instruction_1_out[19:15]),
-        .rs2_addr_in(instruction_1_out[24:20]), 
+        .rd_addr_in(instruction_1_out[11:7]), 
 
         // outputs
         .PC_out(pc_2_out),
@@ -157,27 +128,15 @@ module top_module#(
         .rd_addr_out(rd_addr_2_out),
         .WB_Ctrl_out({is_jal_2_out, is_jalr_2_out, is_auipc_2_out, MemtoReg_2_out, RegWrite_2_out}),
         .M_Ctrl_out({MemRead_2_out, MemWrite_2_out, MemSign_2_out, MemWidth_2_out}),
-        .EX_Ctrl_out(ALUCtrl_2_out),
-        .rs1_addr_out(rs1_addr_2_out),
-        .rs2_addr_out(rs2_addr_2_out)
+        .EX_Ctrl_out(ALUCtrl_2_out)
     );
 
     // EX stage 
 
-    alu_op1_mux alu_op1_mux_dut(
-        // inputs
-        .jump(is_jal_2_out | is_jalr_2_out | is_auipc_2_out),
-        .rs1(forwarded_rs1),
-        .pc(pc_2_out),
-
-        // output
-        .operand1(alu_op1)
-    );
-
     alu alu_dut(
         // inputs 
-        .rs1(alu_op1),
-        .rs2(forwarded_rs2),
+        .rs1(rs1_2_out),
+        .rs2(rs2_2_out),
         .imm(imm_2_out),
         .ALUCtrl(ALUCtrl_2_out),
 
@@ -190,22 +149,9 @@ module top_module#(
         .rs1(rs1_2_out),
         .rs2(rs2_2_out),
         .funct3(funct3_2_out),
-        .branch(branch_2_out),
 
         // output
         .branch_taken_out(branch_taken_3_in)
-    );
-
-    pc_jump pc_jump_dut(
-        // inputs
-        .pc(pc_2_out),
-        .imm(imm_2_out),
-        .rs1(rs1_2_out),
-        .is_jal(is_jal_2_out),
-        .is_jalr(is_jalr_2_out),
-
-        // output
-        .pc_jump(pc_jump_addr_3_in)
     );
 
     pc_add_imm pc_add_imm_dut(
@@ -278,33 +224,5 @@ module top_module#(
 
         // output
         .reg_wb_data(reg_wb_data)
-    );
-
-    forwarding_unit forwarding_unit_dut(
-        // inputs
-        .EX_MEM_RegWrite(RegWrite_3_out),
-        .MEM_WB_RegWrite(RegWrite_4_out),
-        .EX_MEM_rd(rd_addr_3_out),
-        .MEM_WB_rd(rd_addr_4_out),
-        .ID_EX_rs1(rs1_addr_2_out),
-        .ID_EX_rs2(rs2_addr_2_out),
-
-        // outputs
-        .forwardA(forwardA),
-        .forwardB(forwardB)
-    );
-
-    forward_mux forward_mux_dut(
-        // inputs
-        .reg_data_rs1(rs1_2_out),
-        .reg_data_rs2(rs2_2_out),
-        .ex_alu_res(alu_res_3_out),
-        .reg_wb_data(reg_wb_data),
-        .forwardA(forwardA),
-        .forwardB(forwardB),
-
-        // outputs
-        .forwarded_rs1(forwarded_rs1),
-        .forwarded_rs2(forwarded_rs2)
     );
 endmodule

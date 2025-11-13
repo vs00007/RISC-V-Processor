@@ -6,7 +6,7 @@ module alu #(
     input [REG_WIDTH - 1 : 0] rs1, rs2, imm,
     input [ALU_CTRL_BITS - 1 : 0] ALUCtrl,
     
-    output reg [REG_WIDTH - 1 : 0] alu_out, 
+    output reg [REG_WIDTH - 1 : 0] alu_out
 );
     wire [REG_WIDTH - 1 : 0] add_ans, sub_ans, xor_ans, or_ans, and_ans, sll_ans, srl_ans, sra_ans, slt_ans, sltu_ans;
     wire [REG_WIDTH - 1 : 0] addi_ans, xori_ans, ori_ans, andi_ans, slli_ans, srli_ans, srai_ans, slti_ans, sltui_ans;

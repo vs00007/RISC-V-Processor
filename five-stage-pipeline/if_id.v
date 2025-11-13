@@ -1,6 +1,6 @@
 // the first register between IF and ID stages
 module if_id_reg #(
-    parameter int PC_WIDTH = 64,
+    parameter int PC_WIDTH = 64
 )
 (
     input clk,
@@ -9,7 +9,7 @@ module if_id_reg #(
     input [31 : 0] instruction_in,
 
     output reg [PC_WIDTH - 1 : 0] PC_out,
-    output reg [INSTRUCTION_WIDTH - 1 : 0] instruction_out
+    output reg [31 : 0] instruction_out
 );
     always @(posedge clk, posedge rst) begin
         if(rst) begin
