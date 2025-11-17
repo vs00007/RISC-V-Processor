@@ -21,6 +21,7 @@ module id_ex_reg#(
     input [$clog2(REG_COUNT) - 1 : 0] rd_addr_in,
     input [$clog2(REG_COUNT) - 1 : 0] rs1_addr_in,
     input [$clog2(REG_COUNT) - 1 : 0] rs2_addr_in,
+    input stall,
 
     output reg [PC_WIDTH - 1 : 0] PC_out,
     output reg [REG_WIDTH - 1 : 0] rs1_data_out,
@@ -35,7 +36,7 @@ module id_ex_reg#(
     output reg [$clog2(REG_COUNT) - 1 : 0] rs2_addr_out
 );
     always @ (posedge clk, posedge rst) begin
-        if(rst) begin
+        if(rst | stall) begin // reset or insert nop when stall
             PC_out <= 0;
             rs1_data_out <= 0;
             rs2_data_out <= 0;

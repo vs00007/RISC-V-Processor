@@ -35,6 +35,7 @@ module top_module#(
     logic [1:0] forwardA, forwardB;
     logic [$clog2(REG_COUNT)-1:0] rs1_addr_2_out, rs2_addr_2_out; 
     logic [REG_WIDTH-1:0] forwarded_rs1, forwarded_rs2;
+    logic stall;
 
 
     pc_reg pc_reg_dut(
@@ -42,6 +43,7 @@ module top_module#(
         .clk(clk),
         .rst(rst),
         .pc_in(pc_reg_in),
+        .stall(stall),
 
         // output
         .pc_out(pc_1_in)
@@ -82,6 +84,7 @@ module top_module#(
         .rst(rst),
         .PC_in(pc_1_in),
         .instruction_in(instruction_1_in),
+        .stall(stall),
 
         // outputs
         .PC_out(pc_1_out),
@@ -146,7 +149,8 @@ module top_module#(
         .funct3_in(instruction_1_out[14:12]), // for branch taken block
         .rd_addr_in(instruction_1_out[11:7]),
         .rs1_addr_in(instruction_1_out[19:15]),
-        .rs2_addr_in(instruction_1_out[24:20]), 
+        .rs2_addr_in(instruction_1_out[24:20]),
+        .stall(stall),
 
         // outputs
         .PC_out(pc_2_out),
@@ -306,5 +310,17 @@ module top_module#(
         // outputs
         .forwarded_rs1(forwarded_rs1),
         .forwarded_rs2(forwarded_rs2)
+    );
+
+    // hazard detection block
+    hazard_unit hazard_unit_dut(
+        // inputs
+        .ID_EX_MemRead(MemRead_2_out),
+        .ID_EX_rd(rd_addr_2_out),
+        .IF_ID_rs1(instruction_1_out[19:15]),
+        .IF_ID_rs2(instruction_1_out[24:20]),
+
+        // outputs
+        .stall(stall)
     );
 endmodule
