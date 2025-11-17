@@ -3,7 +3,7 @@ module id_ex_reg#(
     parameter int PC_WIDTH = 64,
     parameter int REG_WIDTH = 64,
     parameter int REG_COUNT = 32,
-    parameter int EX_Ctrl_bits = 5,
+    parameter int EX_Ctrl_bits = 6,
     parameter int M_Ctrl_bits = 5,
     parameter int WB_Ctrl_bits = 5
 )
@@ -21,7 +21,8 @@ module id_ex_reg#(
     input [$clog2(REG_COUNT) - 1 : 0] rd_addr_in,
     input [$clog2(REG_COUNT) - 1 : 0] rs1_addr_in,
     input [$clog2(REG_COUNT) - 1 : 0] rs2_addr_in,
-    input stall,
+    input stall, // hazard detection signals
+    input flush, // hazard detection signals
 
     output reg [PC_WIDTH - 1 : 0] PC_out,
     output reg [REG_WIDTH - 1 : 0] rs1_data_out,
@@ -36,7 +37,7 @@ module id_ex_reg#(
     output reg [$clog2(REG_COUNT) - 1 : 0] rs2_addr_out
 );
     always @ (posedge clk, posedge rst) begin
-        if(rst | stall) begin // reset or insert nop when stall
+        if(rst | stall | flush) begin // reset or insert nop when stall or flush
             PC_out <= 0;
             rs1_data_out <= 0;
             rs2_data_out <= 0;

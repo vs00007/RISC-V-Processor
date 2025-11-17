@@ -8,12 +8,13 @@ module if_id_reg #(
     input [PC_WIDTH - 1 : 0] PC_in,
     input [31 : 0] instruction_in,
     input stall,
+    input flush,
 
     output reg [PC_WIDTH - 1 : 0] PC_out,
     output reg [31 : 0] instruction_out
 );
     always @(posedge clk, posedge rst) begin
-        if(rst) begin
+        if(rst | flush) begin
             PC_out <= 0;
             instruction_out <= 0;
         end

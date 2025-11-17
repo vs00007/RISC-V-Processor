@@ -35,7 +35,7 @@ module top_module#(
     logic [1:0] forwardA, forwardB;
     logic [$clog2(REG_COUNT)-1:0] rs1_addr_2_out, rs2_addr_2_out; 
     logic [REG_WIDTH-1:0] forwarded_rs1, forwarded_rs2;
-    logic stall;
+    logic stall, flush;
 
 
     pc_reg pc_reg_dut(
@@ -44,6 +44,7 @@ module top_module#(
         .rst(rst),
         .pc_in(pc_reg_in),
         .stall(stall),
+        .flush(flush),
 
         // output
         .pc_out(pc_1_in)
@@ -52,7 +53,7 @@ module top_module#(
     pc_next_mux pc_next_mux_dut(
         // inputs
         .branch_taken(branch_taken_3_in),
-        .jump(is_jal_3_out | is_jalr_3_out),
+        .jump(is_jal_2_out | is_jalr_2_out),
         .pc_plus_4(pc_4),
         .branch_addr(pc_branch_addr_3_in),
         .pc_jump_addr(pc_jump_addr_3_in),
@@ -85,6 +86,7 @@ module top_module#(
         .PC_in(pc_1_in),
         .instruction_in(instruction_1_in),
         .stall(stall),
+        .flush(flush),
 
         // outputs
         .PC_out(pc_1_out),
@@ -141,7 +143,7 @@ module top_module#(
         .rst(rst),
         .WB_Ctrl_in({is_jal_2_in, is_jalr_2_in, is_auipc_2_in, MemtoReg_2_in, RegWrite_2_in}),
         .M_Ctrl_in({MemRead_2_in, MemWrite_2_in, MemSign_2_in, MemWidth_2_in}),
-        .EX_Ctrl_in(ALUCtrl_2_in),
+        .EX_Ctrl_in({ALUCtrl_2_in, branch_2_in}),
         .PC_in(pc_1_out),
         .rs1_data_in(rs1_2_in),
         .rs2_data_in(rs2_2_in),
@@ -151,6 +153,7 @@ module top_module#(
         .rs1_addr_in(instruction_1_out[19:15]),
         .rs2_addr_in(instruction_1_out[24:20]),
         .stall(stall),
+        .flush(flush),
 
         // outputs
         .PC_out(pc_2_out),
@@ -161,7 +164,7 @@ module top_module#(
         .rd_addr_out(rd_addr_2_out),
         .WB_Ctrl_out({is_jal_2_out, is_jalr_2_out, is_auipc_2_out, MemtoReg_2_out, RegWrite_2_out}),
         .M_Ctrl_out({MemRead_2_out, MemWrite_2_out, MemSign_2_out, MemWidth_2_out}),
-        .EX_Ctrl_out(ALUCtrl_2_out),
+        .EX_Ctrl_out({ALUCtrl_2_out, branch_2_out}),
         .rs1_addr_out(rs1_addr_2_out),
         .rs2_addr_out(rs2_addr_2_out)
     );
@@ -319,8 +322,12 @@ module top_module#(
         .ID_EX_rd(rd_addr_2_out),
         .IF_ID_rs1(instruction_1_out[19:15]),
         .IF_ID_rs2(instruction_1_out[24:20]),
+        .branch_taken(branch_taken_3_in),
+        .is_jal(is_jal_2_out),
+        .is_jalr(is_jalr_2_out),
 
         // outputs
-        .stall(stall)
+        .stall(stall),
+        .flush(flush)
     );
 endmodule
