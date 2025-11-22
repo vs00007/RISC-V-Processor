@@ -15,13 +15,15 @@ module ex_mem_reg#(
     input [REG_WIDTH - 1 : 0] ALU_res_in,
     input [REG_WIDTH - 1 : 0] rs2_data_in,
     input [$clog2(REG_COUNT) - 1 : 0] rd_addr_in,
+    input [$clog2(REG_COUNT) - 1 : 0] rs2_addr_in,
 
     output reg [WB_Ctrl_bits - 1 : 0] WB_Ctrl_out,
     output reg [M_Ctrl_bits - 1 : 0] M_Ctrl_out,
     output reg [PC_WIDTH - 1 : 0] PC_out,
     output reg [REG_WIDTH - 1 : 0] ALU_res_out,
     output reg [REG_WIDTH - 1 : 0] rs2_data_out,
-    output reg [$clog2(REG_COUNT) - 1 : 0] rd_addr_out
+    output reg [$clog2(REG_COUNT) - 1 : 0] rd_addr_out,
+    output reg [$clog2(REG_COUNT) - 1 : 0] rs2_addr_out
 );
     always @ (posedge clk, posedge rst) begin
         if(rst) begin
@@ -31,6 +33,7 @@ module ex_mem_reg#(
             ALU_res_out <= 0;
             rs2_data_out <= 0;
             rd_addr_out <= 0;
+            rs2_addr_out <= 0;
         end
         else begin
             WB_Ctrl_out <= WB_Ctrl_in;
@@ -39,6 +42,7 @@ module ex_mem_reg#(
             ALU_res_out <= ALU_res_in;
             rs2_data_out <= rs2_data_in;
             rd_addr_out <= rd_addr_in;
+            rs2_addr_out <= rs2_addr_in;
         end
     end
 endmodule

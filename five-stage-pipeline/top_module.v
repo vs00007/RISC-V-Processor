@@ -36,6 +36,8 @@ module top_module#(
     logic [$clog2(REG_COUNT)-1:0] rs1_addr_2_out, rs2_addr_2_out; 
     logic [REG_WIDTH-1:0] forwarded_rs1, forwarded_rs2;
     logic stall, flush;
+    logic [4:0] rs2_addr_3_out;
+    logic [1:0] flag;
 
 
     pc_reg pc_reg_dut(
@@ -194,8 +196,8 @@ module top_module#(
 
     branch_taken branch_taken_dut(
         // inputs
-        .rs1(rs1_2_out),
-        .rs2(rs2_2_out),
+        .rs1(forwarded_rs1),
+        .rs2(forwarded_rs2),
         .funct3(funct3_2_out),
         .branch(branch_2_out),
 
@@ -232,8 +234,9 @@ module top_module#(
         .M_Ctrl_in({MemRead_2_out, MemWrite_2_out, MemSign_2_out, MemWidth_2_out}),
         .PC_in(pc_branch_addr_3_in),
         .ALU_res_in(alu_res_3_in),
-        .rs2_data_in(rs2_2_out),
+        .rs2_data_in(flag == 2'b10 ? reg_wb_data : (flag == 2'b01 ? alu_res_3_out : rs2_2_out)),
         .rd_addr_in(rd_addr_2_out),
+        .rs2_addr_in(rs2_addr_2_out),
 
         // outputs
         .WB_Ctrl_out({is_jal_3_out, is_jalr_3_out, is_auipc_3_out, MemtoReg_3_out, RegWrite_3_out}),
@@ -241,7 +244,8 @@ module top_module#(
         .PC_out(pc_branch_addr_3_out),
         .ALU_res_out(alu_res_3_out),
         .rs2_data_out(rs2_3_out),
-        .rd_addr_out(rd_addr_3_out)
+        .rd_addr_out(rd_addr_3_out),
+        .rs2_addr_out(rs2_addr_3_out)
     );
 
     // MEM stage
@@ -329,5 +333,15 @@ module top_module#(
         // outputs
         .stall(stall),
         .flush(flush)
+    );  
+
+    // store forwarding 
+    store_forwarding_unit store_forwarding_unit_dut(
+        // inputs
+        .MEM_WB_rd_addr(rd_addr_4_out),
+        .EX_MEM_rd_addr(rd_addr_3_out),
+        .ID_EX_rs2_addr(rs2_addr_2_out),
+        // output
+        .flag(flag)
     );
 endmodule

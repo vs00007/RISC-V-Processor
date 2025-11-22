@@ -72,7 +72,7 @@ module top_module_tb;
 
         // run for enough cycles to drain the pipeline
         // (N instructions + 4 pipeline stages)
-        repeat (17) begin
+        repeat (100) begin
             @(posedge clk);
             cycle = cycle + 1;
 
